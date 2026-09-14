@@ -1,5 +1,6 @@
 name: Daily log check
-# 23:30 Lagos. Looks for logs/<today>.md on ANY branch (your week branch counts).
+# ~23:30 Lagos. Looks for that day's logs/<date>.md on ANY branch (your week branch counts).
+# If the run drifts past midnight it judges the day that just ended, not the new one.
 # Missing? Opens or updates one "Missing daily log" issue.
 on:
   schedule:
@@ -20,7 +21,14 @@ jobs:
         run: |
           CYCLE_START=2026-09-14
           CYCLE_END=2026-12-06
-          TODAY=$(TZ=Africa/Lagos date +%F)
+          # GitHub cron drifts, sometimes past midnight. If we woke after midnight,
+          # the day we are judging is the one that just ended, not the one that just began.
+          HOUR=$(TZ=Africa/Lagos date +%H)
+          if [ "$HOUR" -lt 6 ]; then
+            TODAY=$(TZ=Africa/Lagos date -d "yesterday" +%F)
+          else
+            TODAY=$(TZ=Africa/Lagos date +%F)
+          fi
           if [[ "$TODAY" < "$CYCLE_START" || "$TODAY" > "$CYCLE_END" ]]; then
             echo "Outside the cycle ($CYCLE_START to $CYCLE_END). Nothing to do."
             echo "skip=yes" >> "$GITHUB_OUTPUT"
