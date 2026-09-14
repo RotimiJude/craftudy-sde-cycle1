@@ -16,4 +16,4 @@ docker compose up
 
 ## Weekly rhythm
 Branch per week (`week-1`), **commit and push a log every day**, PR by Sunday 9pm.
-Full walkthrough with a worked example: [SUBMISSION.md](SUBMISSION.md)
+Full walkthrough with a worked example: **[How a week works](https://adexsimply.github.io/craftudy-sde-plan/submission.html)** (always current) — local snapshot: [SUBMISSION.md](SUBMISSION.md)

@@ -2,6 +2,41 @@
 
 One week = one branch = one pull request. That is the whole "submission package".
 
+**Always read the current version here:** https://adexsimply.github.io/craftudy-sde-plan/submission.html
+(This file is a snapshot from the day you created your repo. The web version is the live one.)
+
+---
+
+## First, what a pull request actually is
+
+You already know: clone, branch, commit, push, merge.
+
+A pull request is the **merge**, with a pause in it.
+
+Normally you would finish `week-1` and merge it into `main` yourself, alone, and nobody ever
+sees the work. Instead you push `week-1` to GitHub and say "I would like to merge this into
+main". GitHub holds the merge open. People read the code, ask questions, leave comments on
+specific lines. When it is approved, the merge happens.
+
+Same merge. Same two branches. The only new thing is that it happens in the open, and someone
+looks before the button is pressed. That is the entire idea, and it is how every team you will
+ever join ships code.
+
+So: nothing new to learn. You already have the skills. You are just merging in public.
+
+## Access: does Shina need to be added?
+
+Your repo is public, so he can already read everything and comment on any pull request without
+being added. But **add him and each other as collaborators anyway** so that review requests and
+notifications work properly:
+
+Repo → **Settings** → **Collaborators** → **Add people** →
+add `adexsimply` and your peer (`RotimiJude` or `Ayemo-AndrewGold`) → role **Write**.
+
+Do that once, now. You never touch it again.
+
+---
+
 If you only read one thing, read this: **you push every day, not once a week.** The log for
 today must be on GitHub tonight. A folder full of logs pushed on Sunday counts as one day,
 and the bot will have opened an issue every night in between.
@@ -101,6 +136,33 @@ PR by Sunday 9pm.
 
 The call holds even if only one person shows up.
 
+## If you use GitHub Desktop
+
+Everything above in buttons instead of commands.
+
+**Monday, start the week's branch**
+1. `Current Branch` dropdown → **New Branch** → name it `week-1` → **Create Branch**.
+2. Click **Publish branch** so it exists on GitHub too.
+
+**Every day**
+1. Do the work. Create `logs/2026-09-15.md` in your editor and fill it in.
+2. GitHub Desktop shows the changed files under **Changes**.
+3. Type a short summary at the bottom left, e.g. `day 1: ssh keys working`.
+4. Click **Commit to week-1**.
+5. Click **Push origin**. This is the step people forget. Nothing is on GitHub until you push.
+
+**Sunday, open the pull request**
+1. Push your last commit.
+2. Click **Preview Pull Request** (or menu **Branch → Create Pull Request**). Your browser opens.
+3. Check it says `base: main ← compare: week-1`.
+4. The description box is already filled with the headings. Complete them.
+5. Click **Create pull request**. You are done, that is the submission.
+
+**After it is approved**
+1. On the website, click **Merge pull request**.
+2. Back in GitHub Desktop: `Current Branch` → `main` → **Fetch/Pull origin**.
+3. New week, new branch from `main`.
+
 ## Quick answers
 
 **Do I push once a week?** No. Daily. The bot checks nightly.
@@ -114,3 +176,12 @@ one missed daily log does not.
 
 **Stuck more than 45 minutes?** Write the blocker in the log and in the group. AI first, then
 your peer, then Shina.
+
+**We have never used PRs before.** You have merged before. This is a merge with a review pause.
+Nothing else is different.
+
+**Do we add Shina as a collaborator?** The repo is public so he can see it regardless, but yes,
+add him and each other with Write access. See the access section above.
+
+**Where does the review conversation happen?** On the pull request page itself, on the
+"Files changed" tab. Click a line number to comment on that exact line.
