@@ -9,8 +9,6 @@ response.statusCode = 200;
 response.setHeader("Content-Type", "application/json");
         response.end(tasks);
     }
-
-
 else if (request.method === "POST" && request.url === "/tasks") {
     let body = "";
 
@@ -18,43 +16,17 @@ else if (request.method === "POST" && request.url === "/tasks") {
         body += chunk;
     });
 
-
-
     request.on("end",async() => {
-
-let newTask;
-
-try{
-       newTask = JSON.parse(body);
-
-}
-
-catch (error){
-response.statusCode = 400;
-response.setHeader("Content-Type", "text/plain");
-response.end("Invalid JSON");
-return;}
-
-try{
+        const newTask = JSON.parse(body);
 const file = await fs.readFile("tasks.json", "utf8");
-
     const tasks = JSON.parse(file);
-
 tasks.push(newTask);
-
 await fs.writeFile("tasks.json", JSON.stringify(tasks, null, 2));
-
 console.log(newTask);
-}
-catch (error){
-response.statusCode = 500;
-
+response.statusCode = 201;
 response.setHeader("Content-Type", "text/plain");
-        response.end("Server error!");
-return;
-    });
-}
-
+        response.end("Task received!");
+    });}
  else {
         response.statusCode = 404;
         response.end("Not Found");
