@@ -1,66 +1,73 @@
 const http = require("http");
 const fs = require("fs").promises;
+
 const PORT = process.env.PORT || 3000;
 
 const server = http.createServer(async (request, response) => {
+
     if (request.method === "GET" && request.url === "/tasks") {
+
         const tasks = await fs.readFile("tasks.json", "utf8");
-response.statusCode = 200;
-response.setHeader("Content-Type", "application/json");
+
+        response.statusCode = 200;
+        response.setHeader("Content-Type", "application/json");
         response.end(tasks);
-    }
 
+    } else if (request.method === "POST" && request.url === "/tasks") {
 
-else if (request.method === "POST" && request.url === "/tasks") {
-    let body = "";
+        let body = "";
 
-    request.on("data", (chunk) => {
-        body += chunk;
-    });
+        request.on("data", (chunk) => {
+            body += chunk;
+        });
 
+        request.on("end", async () => {
 
+            let newTask;
 
-    request.on("end",async() => {
+            try {
+                newTask = JSON.parse(body);
+            } catch (error) {
+                response.statusCode = 400;
+                response.setHeader("Content-Type", "text/plain");
+                response.end("Invalid JSON");
+                return;
+            }
 
-let newTask;
+            try {
+                const file = await fs.readFile("tasks.json", "utf8");
+                const tasks = JSON.parse(file);
 
-try{
-       newTask = JSON.parse(body);
+                tasks.push(newTask);
 
-}
+                await fs.writeFile(
+                    "tasks.json",
+                    JSON.stringify(tasks, null, 2)
+                );
 
-catch (error){
-response.statusCode = 400;
-response.setHeader("Content-Type", "text/plain");
-response.end("Invalid JSON");
-return;}
+                console.log(newTask);
 
-try{
-const file = await fs.readFile("tasks.json", "utf8");
+                response.statusCode = 201;
+                response.setHeader("Content-Type", "text/plain");
+                response.end("Task received!");
 
-    const tasks = JSON.parse(file);
+            } catch (error) {
+                console.error(error);
 
-tasks.push(newTask);
+                response.statusCode = 500;
+                response.setHeader("Content-Type", "text/plain");
+                response.end("Server error!");
+                return;
+            }
+        });
 
-await fs.writeFile("tasks.json", JSON.stringify(tasks, null, 2));
+    } else {
 
-console.log(newTask);
-}
-catch (error){
-response.statusCode = 500;
-
-response.setHeader("Content-Type", "text/plain");
-        response.end("Server error!");
-return;
-    });
-}
-
- else {
         response.statusCode = 404;
         response.end("Not Found");
     }
 });
 
 server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT} `);
+    console.log(`Server running on port ${PORT}`);
 });
