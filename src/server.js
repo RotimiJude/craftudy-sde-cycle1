@@ -1,73 +1,24 @@
-const http = require("http");
-const fs = require("fs").promises;
 
+const express = require("express");
+
+const app = express();
 const PORT = process.env.PORT || 3000;
 
-const server = http.createServer(async (request, response) => {
 
-    if (request.method === "GET" && request.url === "/tasks") {
-
-        const tasks = await fs.readFile("tasks.json", "utf8");
-
-        response.statusCode = 200;
-        response.setHeader("Content-Type", "application/json");
-        response.end(tasks);
-
-    } else if (request.method === "POST" && request.url === "/tasks") {
-
-        let body = "";
-
-        request.on("data", (chunk) => {
-            body += chunk;
-        });
-
-        request.on("end", async () => {
-
-            let newTask;
-
-            try {
-                newTask = JSON.parse(body);
-            } catch (error) {
-                response.statusCode = 400;
-                response.setHeader("Content-Type", "text/plain");
-                response.end("Invalid JSON");
-                return;
-            }
-
-            try {
-                const file = await fs.readFile("tasks.json", "utf8");
-                const tasks = JSON.parse(file);
-
-                tasks.push(newTask);
-
-                await fs.writeFile(
-                    "tasks.json",
-                    JSON.stringify(tasks, null, 2)
-                );
-
-                console.log(newTask);
-
-                response.statusCode = 201;
-                response.setHeader("Content-Type", "text/plain");
-                response.end("Task received!");
-
-            } catch (error) {
-                console.error(error);
-
-                response.statusCode = 500;
-                response.setHeader("Content-Type", "text/plain");
-                response.end("Server error!");
-                return;
-            }
-        });
-
-    } else {
-
-        response.statusCode = 404;
-        response.end("Not Found");
-    }
+app.use((request, response, next) => {
+    console.log(`${request.method} ${request.url}`);
+    next();
 });
 
-server.listen(PORT, () => {
+
+const tasks = [];
+
+
+app.get("/tasks", (request, response) => {
+    response.status(200).json(tasks);
+});
+
+app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
