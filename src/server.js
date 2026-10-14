@@ -1,73 +1,123 @@
-const http = require("http");
-const fs = require("fs").promises;
+const { z } = require("zod")
+const express = require("express");
+const app = express();
+app.use(express.json());
+app.use ((request, response, next) => {
+console.log(request.method, request.url);
+next();
+});
+const taskSchema = z.object({
+title: z.string().trim().min(1, "Title is required")
+});
+const updateTaskSchema = z.object({
+title: z.string().trim().min(1, "Title is required"),
+completed: z.boolean()
+});
+const tasks = [
+{id:1, title: "Learn Express", completed: false},
+{id:2, title: "Build Tasks API", completed: false}
+];
 
-const PORT = process.env.PORT || 3000;
+app.get("/", (request, response) => {
+response.send("My Tasks Api is working!");
+});
 
-const server = http.createServer(async (request, response) => {
+app.get("/tasks/:id", (request, response) => {
+const id = Number(request.params.id);
+const task =tasks.find((task) => task.id === id);
+if (!task){
+return response.status(404).json({
+error: "Task not found"
+});
+}
+response.status(200).json(task);
+});
 
-    if (request.method === "GET" && request.url === "/tasks") {
+app.get("/tasks", (request, response) => {
+response.status(200).json(tasks);
+});
 
-        const tasks = await fs.readFile("tasks.json", "utf8");
 
-        response.statusCode = 200;
-        response.setHeader("Content-Type", "application/json");
-        response.end(tasks);
+app.put("/tasks/:id", (request, response) => {
+    const id = Number(request.params.id);
 
-    } else if (request.method === "POST" && request.url === "/tasks") {
+    const result = updateTaskSchema.safeParse(request.body);
 
-        let body = "";
-
-        request.on("data", (chunk) => {
-            body += chunk;
+    if (!result.success) {
+        return response.status(400).json({
+            error: result.error.issues[0].message
         });
-
-        request.on("end", async () => {
-
-            let newTask;
-
-            try {
-                newTask = JSON.parse(body);
-            } catch (error) {
-                response.statusCode = 400;
-                response.setHeader("Content-Type", "text/plain");
-                response.end("Invalid JSON");
-                return;
-            }
-
-            try {
-                const file = await fs.readFile("tasks.json", "utf8");
-                const tasks = JSON.parse(file);
-
-                tasks.push(newTask);
-
-                await fs.writeFile(
-                    "tasks.json",
-                    JSON.stringify(tasks, null, 2)
-                );
-
-                console.log(newTask);
-
-                response.statusCode = 201;
-                response.setHeader("Content-Type", "text/plain");
-                response.end("Task received!");
-
-            } catch (error) {
-                console.error(error);
-
-                response.statusCode = 500;
-                response.setHeader("Content-Type", "text/plain");
-                response.end("Server error!");
-                return;
-            }
-        });
-
-    } else {
-
-        response.statusCode = 404;
-        response.end("Not Found");
     }
+
+    const task = tasks.find((task) => task.id === id);
+
+    if (!task) {
+        return response.status(404).json({
+            error: "Task not found"
+        });
+    }
+
+    task.title = result.data.title;
+    task.completed = result.data.completed;
+
+    response.status(200).json(task);
 });
 
-server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+app.delete("/tasks/:id", (request, response) => {
+    const id = Number(request.params.id);
+
+    const taskIndex = tasks.findIndex((task) => task.id === id);
+
+    if (taskIndex === -1) {
+        return response.status(404).json({
+            error: "Task not found"
+        });
+    }
+
+    tasks.splice(taskIndex, 1);
+
+    response.status(204).send();
 });
+
+
+app.post("/tasks", (request, response) => {
+const result = taskSchema.safeParse(request.body);
+
+if (!result.success) {
+return response.status(400).json({
+error:result.error.issues[0].message
+});
+}
+const newTask={
+id: tasks.length === 0
+    ? 1
+    : Math.max(...tasks.map(task => task.id)) + 1,
+title: result.data.title,
+completed: false
+};
+tasks.push(newTask);
+response.status(201).json(newTask);
+});
+
+app.use((error, request, response, next) => {
+    console.error(error);
+    if (error.type === "entity.parse.failed") {
+        return response.status(400).json({
+            error: "Invalid JSON"
+        });
+    }
+
+
+    response.status(500).json({
+        error: "Internal server error"
+    });
+});
+
+
+
+
+app.listen(3000, () => {
+    console.log("Server is running on port 3000");
+});
+
+
