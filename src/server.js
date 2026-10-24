@@ -15,7 +15,8 @@ completed: z.boolean()
 });
 const tasks = [
 {id:1, title: "Learn Express", completed: false},
-{id:2, title: "Build Tasks API", completed: false}
+{id:2, title: "Build Tasks API", completed: false},
+{id:3, title: "Peer Review", completed: false}
 ];
 
 app.get("/", (request, response) => {
