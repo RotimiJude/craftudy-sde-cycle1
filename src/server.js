@@ -22,6 +22,11 @@ response.send("My Tasks Api is working!");
 app.get("/tasks/:id", async (request, response, next) => {
     try {
         const id = Number(request.params.id);
+         if (!Number.isInteger(id) || id < 1){
+              return response.status(400).json({
+                  error: "Invalid task ID"
+                 });
+              }
 
         const result = await pool.query(
             "SELECT * FROM tasks WHERE id = $1",
@@ -68,6 +73,12 @@ app.put("/tasks/:id", async (request, response, next) => {
     try {
         const id = Number(request.params.id);
 
+if (!Number.isInteger(id) || id < 1) {
+    return response.status(400).json({
+        error: "Invalid task ID"
+    });
+}
+
         const validatedData = updateTaskSchema.parse(request.body);
 
         const result = await pool.query(
@@ -95,6 +106,12 @@ app.put("/tasks/:id", async (request, response, next) => {
 app.delete("/tasks/:id", async (request, response, next) => {
     try {
         const id = Number(request.params.id);
+
+if (!Number.isInteger(id) || id < 1) {
+    return response.status(400).json({
+        error: "Invalid task ID"
+    });
+}
 
         const result = await pool.query(
             "DELETE FROM tasks WHERE id = $1 RETURNING *",
@@ -138,14 +155,20 @@ app.post("/tasks", async (request, response, next) => {
 
 app.use((error, request, response, next) => {
     console.error(error);
-    if (error.type === "entity.parse.failed") {
+
+       if (error.type === "entity.parse.failed") {
         return response.status(400).json({
             error: "Invalid JSON"
         });
     }
 
+       if (error instanceof z.ZodError) {
+        return response.status(400).json({
+            error: error.issues[0]?.message || "Invalid request data"
+        });
+    }
 
-    response.status(500).json({
+       response.status(500).json({
         error: "Internal server error"
     });
 });
